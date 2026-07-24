@@ -2,13 +2,15 @@ import torch
 import warnings
 
 class Trainer():
-    def __init__(self, model, selector, dataloaders, config):
+    def __init__(self, model, dataloaders, selector, loss_function, optimizer, config):
         self.model = model
         self.selector = selector
         self.train_loader = dataloaders[0]
         self.val_loader = dataloaders[1]
         self.config = config
         self.total_epochs = config["total_epochs"]
+        self.criterion = loss_function
+        self.optimizer = optimizer
 
         if torch.cuda.is_available():
             self.device = torch.deivce("cuda")
@@ -40,7 +42,12 @@ class Trainer():
             outputs = model(images)
 
             # Calculate Loss
-            loss = criterion(outputs, labels)
+            loss = self.criterion(outputs, labels)
+
+            # Backpropagation
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
     
     def after_train():
         raise NotImplementedError

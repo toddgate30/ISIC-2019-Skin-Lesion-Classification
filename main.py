@@ -49,11 +49,11 @@ def main():
 
     trainer = Trainer(
         model=model,
-        selector=selector,
         dataloaders=dataloaders,
-        config=config,
+        selector=selector,
         loss_function=loss_function,
-        optimizer = optimizer
+        optimizer = optimizer,
+        config=config
         )
     
     trainer.before_train()
