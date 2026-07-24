@@ -14,7 +14,7 @@ class DiagnosticManager():
         self.next_diagnostic_step = 1
         self.best_val_acc = 0.0
         self.save_parent_dir = Path(config.get("save_dir", "./experiments"))
-        run_dir = self.config["run_dir"]
+        run_dir = config["run_dir"]
         self.save_dir = self.save_parent_dir / run_dir
         self.save_dir.mkdir(parents=True, exist_ok=True)
 

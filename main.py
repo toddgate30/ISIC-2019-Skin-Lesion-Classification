@@ -44,13 +44,13 @@ def main():
         name=wandb_name
     )
 
-    dataloaders = prepare_data(config)
+    train_loader, train_metrics_loader, val_loader, class_counts = prepare_data(config)
 
     model = build_model(config)
 
     selector = build_selector(config)
 
-    loss_function = build_loss(config)
+    loss_function = build_loss(config, class_counts)
 
     optimizer = build_optimizer(model, config)
 
@@ -58,7 +58,7 @@ def main():
 
     trainer = Trainer(
         model=model,
-        dataloaders=dataloaders,
+        dataloaders=(train_loader, train_metrics_loader, val_loader),
         selector=selector,
         loss_function=loss_function,
         optimizer = optimizer,

@@ -83,7 +83,7 @@ def prepare_data(config):
 
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, shuffle=True, stratify=stratify_labels)
 
-    seed = config["seed"]
+    seed = config["project"]["seed"]
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -99,7 +99,11 @@ def prepare_data(config):
     train_metrics_loader = DataLoader(train_dataset, batch_size=298, shuffle=False, num_workers=num_workers)
     val_loader = DataLoader(val_dataset, batch_size=298, shuffle=False, num_workers=num_workers)
 
-    return train_loader, train_metrics_loader, val_loader
+    train_labels = train_df[label_columns].values.argmax(axis=1)
+    class_counts = np.bincount(train_labels)
+
+
+    return train_loader, train_metrics_loader, val_loader, class_counts
     
 
 # prepare_data({"dataset": {"name": "isic2019", "path": "salviohexia/isic-2019-skin-lesion-images-for-classification"}})
