@@ -9,6 +9,7 @@ from src.selection_methods.build_selector import build_selector
 from src.Trainer import Trainer
 from src.loss_functions.build_loss import build_loss
 from src.optimizers.build_optimizer import build_optimizer
+from src.diagnostics.diagnostic_manager import DiagnosticManager
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -47,12 +48,15 @@ def main():
 
     optimizer = build_optimizer(model, config)
 
+    diagnostic_manager = DiagnosticManager(config)
+
     trainer = Trainer(
         model=model,
         dataloaders=dataloaders,
         selector=selector,
         loss_function=loss_function,
         optimizer = optimizer,
+        diagnostics_manager = diagnostic_manager,
         config=config
         )
     
