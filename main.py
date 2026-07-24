@@ -35,7 +35,7 @@ def main():
         config=config
     )
 
-    dataloaders = prepare_data(config)
+    train_loader, val_loader = prepare_data(config)
 
     model = build_model(config)
 
