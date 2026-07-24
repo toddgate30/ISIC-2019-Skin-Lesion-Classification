@@ -25,6 +25,11 @@ def main():
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
+    # if torch.cuda.is_available():
+    #     config["device"] = torch.device("cuda")
+    # else:
+
+
     wandb.init(
         project=config["wandb"]["project"]
         config=config

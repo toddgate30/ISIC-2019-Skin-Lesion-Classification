@@ -1,0 +1,9 @@
+# config.yaml
+
+project:
+  name: isic_skin_lesion
+  seed: 1
+
+dataset:
+  name: isic2019
+  path: salviohexia/isic-2019-skin-lesion-images-for-classification
