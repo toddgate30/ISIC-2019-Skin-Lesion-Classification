@@ -3,6 +3,8 @@ from diagnostics import *
 import wandb
 import numpy as np
 from scipy import optimize
+from pathlib import Path
+from datetime import datetime
 
 class DiagnosticManager():
     def __init__(self, config):
@@ -12,6 +14,11 @@ class DiagnosticManager():
         else:
             raise NotImplementedError(f"Diagnostic Interval {self.diagnostic_interval} not implemented.")
         self.next_diagnostic_step = 1
+        self.best_val_acc = 0.0
+        self.save_parent_dir = Path(config.get("save_dir", "./experiments"))
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.save_dir = self.save_parent_dir / timestamp
+        self.save_dir.mkdir(parents=True, exist_ok=True)
 
 
     def _should_run(self, step):
@@ -22,17 +29,18 @@ class DiagnosticManager():
         else:
             return False
 
-    def conditional_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device):
+    def conditional_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer):
         if self._should_run(self, step):
-            self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device)
+            self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False)
 
-    def forced_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device):
-        self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader)
+    def forced_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False):
+        self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=final_log)
 
-    def run_diagnostics(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device):
+    def run_diagnostics(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False):
         train_loss, train_acc, train_progress = self.calculate_diagnotics(model, loss_function, train_metrics_loader, device)
-        val_loss, val_acc, val_progress = self.calculate_diagnotics(model, loss_function, train_metrics_loader, device)
+        val_loss, val_acc, val_progress = self.calculate_diagnotics(model, loss_function, val_loader, device)
         self._log_metrics(step, epoch, train_loss, train_acc, train_progress, val_loss, val_acc, val_progress)
+        self.save_model(step, epoch, optimizer, model, final_log, val_acc)
 
     def calculate_diagnotics(self, model, loss_function, dataloader, device):
         loss = 0
@@ -98,5 +106,34 @@ class DiagnosticManager():
             "epoch": epoch
         }, step=step)
 
+    def _should_save(self, val_acc):
+        if val_acc >= self.best_val_acc:
+            self.best_val_acc = val_acc
+            return True
+
+    def save_model(self, step, epoch, optimizer, model, final_log, val_acc):
+        model_save_dir = self.save_dir / "snapshots"
+        model_save_dir.mkdir(parents=True, exist_ok=True)
+
+        if final_log == True:
+            checkpoint_path = model_save_dir / "last_step_checkpoint.pt"
+            checkpoint = {
+                "step": step,
+                "epoch": epoch,
+                "val_acc": val_acc,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state": optimizer.state_dict()
+            }
+            torch.save(checkpoint, checkpoint_path)
+        elif self._should_save(self, val_acc):
+            checkpoint_path = model_save_dir / "best_acc_checkpoint.pt"
+            checkpoint = {
+                "step": step,
+                "epoch": epoch,
+                "val_acc": val_acc,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state": optimizer.state_dict()
+            }
+            torch.save(checkpoint, checkpoint_path)
 
 

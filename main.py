@@ -64,5 +64,7 @@ def main():
     trainer.train()
     trainer.after_train()
 
+    wandb.finish()
+
 if __name__ == "__main__":
     main()

@@ -21,7 +21,7 @@ class Trainer():
             self.device = torch.device("cpu")
 
     def before_train(self):
-        self.diagnostic_manager.forced_run(0, 0, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device)
+        self.diagnostic_manager.forced_run(0, 0, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer)
     
     def train(self):
         device = self.device
@@ -52,8 +52,8 @@ class Trainer():
                 loss.backward()
                 self.optimizer.step()
 
-                self.diagnostic_manager.conditional_run(step, epoch, model, self.criterion, self.train_metrics_loader, self.val_loader, device)
+                self.diagnostic_manager.conditional_run(step, epoch, model, self.criterion, self.train_metrics_loader, self.val_loader, device, self.optimizer)
         self.final_step_count = step
     
     def after_train(self):
-        self.diagnostic_manager.forced_run(self.final_step_count, self.total_epochs, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device)
+        self.diagnostic_manager.forced_run(self.final_step_count, self.total_epochs, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer, last_run=True)
