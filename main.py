@@ -34,7 +34,8 @@ def main():
 
 
     wandb.init(
-        project=config["wandb"]["project"]
+        project=config["wandb"]["project"],
+        entity="toddgate30",
         config=config
     )
 

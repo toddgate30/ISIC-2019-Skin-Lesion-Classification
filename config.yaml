@@ -7,3 +7,23 @@ project:
 dataset:
   name: isic2019
   path: salviohexia/isic-2019-skin-lesion-images-for-classification
+
+model_name: resnet18
+
+loss_function: CrossEntropy
+
+optimizer: AdamW
+optim_params:
+  lr: 0.001
+
+selection_method: Uniform
+metabatch_size: 320
+batch_ratio: 0.1
+
+total_epochs: 5
+diagnostics_interval: log_interval
+num_workers: 4
+
+wandb:
+  project: Debug_Xrays
+  
