@@ -24,12 +24,14 @@ class Trainer():
         self.diagnostic_manager.forced_run(0, 0, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer)
     
     def train(self):
-        print("Starting Training")
+        print("Starting Training....")
         device = self.device
         model = self.model
         step = 0
         for epoch in range(1, self.total_epochs + 1):
-            print(f"Training for Epoch {epoch}")
+            print(f"\n{'=' * 50}")
+            print(f"Training Epoch {epoch}")
+            print(f"{'=' * 50}")
             # Training Loop
             model.train()
 
@@ -58,4 +60,4 @@ class Trainer():
         self.final_step_count = step
     
     def after_train(self):
-        self.diagnostic_manager.forced_run(self.final_step_count, self.total_epochs, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer, last_run=True)
+        self.diagnostic_manager.forced_run(self.final_step_count, self.total_epochs, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer, final_log=True)

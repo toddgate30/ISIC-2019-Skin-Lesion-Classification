@@ -10,6 +10,7 @@ from src.Trainer import Trainer
 from src.loss_functions.build_loss import build_loss
 from src.optimizers.build_optimizer import build_optimizer
 from src.diagnostics.diagnostic_manager import DiagnosticManager
+from datetime import datetime
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -28,15 +29,19 @@ def main():
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
-    # if torch.cuda.is_available():
-    #     config["device"] = torch.device("cuda")
-    # else:
-
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if "name" in config["wandb"].keys():
+        wandb_name = config["wandb"]["name"]
+        config["run_dir"] = f"{timestamp}_{wandb_name}"
+    else:
+        wandb_name = timestamp
+        config["run_dir"] = wandb_name
 
     wandb.init(
         project=config["wandb"]["project"],
         entity="toddgate30-byu",
-        config=config
+        config=config,
+        name=wandb_name
     )
 
     dataloaders = prepare_data(config)

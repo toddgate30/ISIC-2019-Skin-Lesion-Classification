@@ -3,7 +3,6 @@ import wandb
 import numpy as np
 from scipy import optimize
 from pathlib import Path
-from datetime import datetime
 
 class DiagnosticManager():
     def __init__(self, config):
@@ -15,28 +14,27 @@ class DiagnosticManager():
         self.next_diagnostic_step = 1
         self.best_val_acc = 0.0
         self.save_parent_dir = Path(config.get("save_dir", "./experiments"))
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.save_dir = self.save_parent_dir / timestamp
+        run_dir = self.config["run_dir"]
+        self.save_dir = self.save_parent_dir / run_dir
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
 
     def _should_run(self, step):
         GROWTH_FACTOR = 1.4
         if step >= self.next_diagnostic_step:
-            self.next_diagnostic_step = int(self.next_diagnostic_step * GROWTH_FACTOR)
+            self.next_diagnostic_step = max(self.next_diagnostic_step + 1, int(self.next_diagnostic_step * GROWTH_FACTOR))
             return True
         else:
             return False
 
     def conditional_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer):
-        if self._should_run(self, step):
+        if self._should_run(step):
             self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False)
 
     def forced_run(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False):
         self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=final_log)
 
     def run_diagnostics(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False):
-        print(f"Running Diagnostics for Epoch {epoch}")
         train_loss, train_acc, train_progress = self.calculate_diagnotics(model, loss_function, train_metrics_loader, device)
         val_loss, val_acc, val_progress = self.calculate_diagnotics(model, loss_function, val_loader, device)
         self._log_metrics(step, epoch, train_loss, train_acc, train_progress, val_loss, val_acc, val_progress)
@@ -88,8 +86,8 @@ class DiagnosticManager():
         def objective(t):
             theta = ignorance_to_truth
             geodesic_cosine = np.clip((
-                np.cos(ignorance_to_predictions) * np.sin((1 - t) * theta / np.sin(theta))
-                + np.cos(truth_to_predictions) * np.sin(t * theta) / (np.sin(theta))
+                np.cos(ignorance_to_predictions) * np.sin((1 - t) * theta) / np.sin(theta)
+                + np.cos(truth_to_predictions) * np.sin(t * theta) / np.sin(theta)
             ), 0.0, 1.0)
             distance = np.arccos(geodesic_cosine)
             return distance.sum()
@@ -106,6 +104,17 @@ class DiagnosticManager():
             "val/progress": val_progress,
             "epoch": epoch
         }, step=step)
+
+        print(
+            f"Epoch {epoch:3d} | "
+            f"Step {step:6d} | "
+            f"Val Loss: {val_loss:.4f} | "
+            f"Val Acc: {val_acc:.2%} | "
+            f"Val Prog: {val_progress:.2f} | "
+            f"Train Loss: {train_loss:.4f} | "
+            f"Train Acc: {train_acc:.2%} | "
+            f"Train Prog: {train_progress:.2f}"
+        )
 
     def _should_save(self, val_acc):
         if val_acc >= self.best_val_acc:

@@ -10,7 +10,7 @@ def build_selector(config):
 
 def uniform_selector(metabatch_images, metabatch_labels, ratio):
     metabatch_size = len(metabatch_labels)
-    batch_size = floor(batch_size * ratio)
+    batch_size = floor(metabatch_size * ratio)
 
     selected_indices = torch.randperm(metabatch_size)[:batch_size]
 

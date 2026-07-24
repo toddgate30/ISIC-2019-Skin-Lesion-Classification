@@ -1,0 +1,14 @@
+Dataset:
+Total samples: 25,331
+Classes: 8
+
+Class distribution:
+NV      12875.0     50.83%
+MEL      4522.0     17.85%
+BCC      3323.0     13.12%
+BKL      2624.0     10.36%
+AK        867.0     03.42%
+SCC       628.0     02.48%
+VASC      253.0     01.00%     
+DF        239.0     00.94%
+UNK         0.0     00.00%

@@ -7,6 +7,8 @@ from torch.utils.data import random_split, Dataset, DataLoader
 import pandas as pd
 from PIL import Image
 from sklearn.model_selection import train_test_split
+import random
+import numpy as np
 
 class ISICDataset(Dataset):
 
@@ -81,15 +83,21 @@ def prepare_data(config):
 
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, shuffle=True, stratify=stratify_labels)
 
+    seed = config["seed"]
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
     train_dataset = ISICDataset(train_df, dataset_path, transform=train_transform)
     val_dataset = ISICDataset(val_df, dataset_path, transform=val_transform)
 
     metabatch_size = config.get("metabatch_size", 320)
     num_workers = config.get("num_workers", 1)
 
-    train_loader = DataLoader(train_dataset, batch_size=metabatch_size, shuffle=True, num_workers=num_workers)
-    train_metrics_loader = DataLoader(train_dataset, batch_size=metabatch_size, shuffle=False, num_workers=num_workers)
-    val_loader = DataLoader(val_dataset, batch_size=metabatch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=metabatch_size, shuffle=True, num_workers=num_workers, drop_last=True)
+    train_metrics_loader = DataLoader(train_dataset, batch_size=298, shuffle=False, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=298, shuffle=False, num_workers=num_workers)
 
     return train_loader, train_metrics_loader, val_loader
     
