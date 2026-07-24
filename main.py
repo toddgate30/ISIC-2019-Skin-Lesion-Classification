@@ -7,6 +7,7 @@ from src.data.prepare_data import prepare_data
 from src.models.build_model import build_model
 from src.selection_methods.build_selector import build_selector
 from src.Trainer import Trainer
+from src.loss_functions import build_loss
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -35,17 +36,21 @@ def main():
         config=config
     )
 
-    train_loader, val_loader = prepare_data(config)
+    dataloaders = prepare_data(config)
 
     model = build_model(config)
 
     selector = build_selector(config)
 
+    loss_function = build_loss(config)
+
     trainer = Trainer(
         model=model,
         selector=selector,
         dataloaders=dataloaders,
-        config=config)
+        config=config,
+        loss_function=loss_function
+        )
     
     trainer.before_train()
     trainer.train()
