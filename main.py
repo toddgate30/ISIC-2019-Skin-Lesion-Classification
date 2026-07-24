@@ -7,7 +7,8 @@ from src.data.prepare_data import prepare_data
 from src.models.build_model import build_model
 from src.selection_methods.build_selector import build_selector
 from src.Trainer import Trainer
-from src.loss_functions import build_loss
+from src.loss_functions.build_loss import build_loss
+from src.optimizers.build_optimizer import build_optimizer
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -44,12 +45,15 @@ def main():
 
     loss_function = build_loss(config)
 
+    optimizer = build_optimizer(model, config)
+
     trainer = Trainer(
         model=model,
         selector=selector,
         dataloaders=dataloaders,
         config=config,
-        loss_function=loss_function
+        loss_function=loss_function,
+        optimizer = optimizer
         )
     
     trainer.before_train()
