@@ -8,6 +8,32 @@ import pandas as pd
 from PIL import Image
 from sklearn.model_selection import train_test_split
 
+class ISICDataset(Dataset):
+
+    def __init__(self, dataframe, image_dir, transform=None):
+        self.df = dataframe
+        self.image_dir = image_dir
+        self.transform = transform
+        self.label_columns = dataframe.columns.drop("image")
+    
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+
+        label = row[self.label_columns].values.argmax()
+        class_name = self.label_columns[label]
+        image_path = self.image_dir / class_name / f"{row['image']}.jpg"
+
+        image = Image.open(image_path).convert("RGB")
+        label = torch.tensor(row.drop("image").values.argmax(), dtype=torch.long)
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label
+
 def prepare_data(config):
     """Loads datasets and return train and validation loaders"""
 
@@ -50,7 +76,7 @@ def prepare_data(config):
     
     df = pd.read_csv(labels_path)
 
-    label_columns = df.columns.drop["image"]
+    label_columns = df.columns.drop("image")
     stratify_labels = df[label_columns].values.argmax(axis=1)
 
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, shuffle=True, stratify=stratify_labels)
@@ -68,25 +94,4 @@ def prepare_data(config):
     return train_loader, train_metrics_loader, val_loader
     
 
-prepare_data({"dataset": {"name": "isic2019", "path": "salviohexia/isic-2019-skin-lesion-images-for-classification"}})
-
-class ISICDataset(Dataset):
-
-    def __init__(self, dataframe, image_dir, transform=None):
-        self.df = dataframe
-        self.image_dir = image_dir
-        self.transform = transform
-    
-    def __len__(self):
-        return len(self.df)
-    
-    def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        image_path = self.image_dir / f"{row['image']}.jpg"
-        image = Image.open(image_path).convert("RGB")
-        label = torch.tensor(row.drop("image").values.argmax(), dtype=torch.long)
-
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label
+# prepare_data({"dataset": {"name": "isic2019", "path": "salviohexia/isic-2019-skin-lesion-images-for-classification"}})

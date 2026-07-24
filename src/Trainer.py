@@ -15,7 +15,7 @@ class Trainer():
         self.diagnostic_manager = diagnostic_manager
 
         if torch.cuda.is_available():
-            self.device = torch.deivce("cuda")
+            self.device = torch.device("cuda")
         else:
             warnings.warn("No cuda device found. Training on CPU")
             self.device = torch.device("cpu")
@@ -24,10 +24,12 @@ class Trainer():
         self.diagnostic_manager.forced_run(0, 0, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer)
     
     def train(self):
+        print("Starting Training")
         device = self.device
         model = self.model
         step = 0
         for epoch in range(1, self.total_epochs + 1):
+            print(f"Training for Epoch {epoch}")
             # Training Loop
             model.train()
 

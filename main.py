@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
-        trype=str,
+        type=str,
         required=True,
         help="Path to configuration yaml file"
     )
@@ -35,7 +35,7 @@ def main():
 
     wandb.init(
         project=config["wandb"]["project"],
-        entity="toddgate30",
+        entity="toddgate30-byu",
         config=config
     )
 
@@ -57,10 +57,10 @@ def main():
         selector=selector,
         loss_function=loss_function,
         optimizer = optimizer,
-        diagnostics_manager = diagnostic_manager,
+        diagnostic_manager = diagnostic_manager,
         config=config
         )
-    
+
     trainer.before_train()
     trainer.train()
     trainer.after_train()

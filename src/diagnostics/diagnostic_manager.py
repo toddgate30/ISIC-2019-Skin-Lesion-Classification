@@ -1,5 +1,4 @@
 import torch
-from diagnostics import *
 import wandb
 import numpy as np
 from scipy import optimize
@@ -37,6 +36,7 @@ class DiagnosticManager():
         self.run_diagnostics(step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=final_log)
 
     def run_diagnostics(self, step, epoch, model, loss_function, train_metrics_loader, val_loader, device, optimizer, final_log=False):
+        print(f"Running Diagnostics for Epoch {epoch}")
         train_loss, train_acc, train_progress = self.calculate_diagnotics(model, loss_function, train_metrics_loader, device)
         val_loss, val_acc, val_progress = self.calculate_diagnotics(model, loss_function, val_loader, device)
         self._log_metrics(step, epoch, train_loss, train_acc, train_progress, val_loss, val_acc, val_progress)
@@ -46,6 +46,7 @@ class DiagnosticManager():
         loss = 0
         acc = 0
         progress = 0
+        model = model.to(device)
         model.eval()
         with torch.no_grad():
             batches = 0
@@ -67,7 +68,7 @@ class DiagnosticManager():
 
     def _calculate_progress(self, log_probs, labels):
         probs = torch.exp(log_probs.detach()).cpu()
-        probs = probs / probs.sum(Dim=1, keepdim=True)
+        probs = probs / probs.sum(dim=1, keepdim=True)
 
         probs = probs.numpy().astype(np.float64)
         labels = labels.detach().cpu().numpy().reshape(-1)
@@ -125,7 +126,7 @@ class DiagnosticManager():
                 "optimizer_state": optimizer.state_dict()
             }
             torch.save(checkpoint, checkpoint_path)
-        elif self._should_save(self, val_acc):
+        elif self._should_save(val_acc):
             checkpoint_path = model_save_dir / "best_acc_checkpoint.pt"
             checkpoint = {
                 "step": step,
