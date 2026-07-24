@@ -62,9 +62,10 @@ def prepare_data(config):
     num_workers = config.get("num_workers", 1)
 
     train_loader = DataLoader(train_dataset, batch_size=metabatch_size, shuffle=True, num_workers=num_workers)
+    train_metrics_loader = DataLoader(train_dataset, batch_size=metabatch_size, shuffle=False, num_workers=num_workers)
     val_loader = DataLoader(val_dataset, batch_size=metabatch_size, shuffle=False, num_workers=num_workers)
 
-    return train_loader, val_loader
+    return train_loader, train_metrics_loader val_loader
     
 
 prepare_data({"dataset": {"name": "isic2019", "path": "salviohexia/isic-2019-skin-lesion-images-for-classification"}})
