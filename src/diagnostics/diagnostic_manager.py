@@ -22,7 +22,7 @@ class DiagnosticManager():
     def _should_run(self, step):
         GROWTH_FACTOR = 1.4
         if step >= self.next_diagnostic_step:
-            self.next_diagnostic_step = max(self.next_diagnostic_step + 1, int(self.next_diagnostic_step * GROWTH_FACTOR))
+            self.next_diagnostic_step = self.next_diagnostic_step + min(500, max(1, int(self.next_diagnostic_step * (GROWTH_FACTOR - 1))))
             return True
         else:
             return False

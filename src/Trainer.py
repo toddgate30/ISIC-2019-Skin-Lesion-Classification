@@ -2,7 +2,7 @@ import torch
 import warnings
 
 class Trainer():
-    def __init__(self, model, dataloaders, selector, loss_function, optimizer, diagnostic_manager, config):
+    def __init__(self, model, dataloaders, selector, loss_function, optimizer, diagnostic_manager, config, device):
         self.model = model
         self.selector = selector
         self.train_loader = dataloaders[0]
@@ -13,12 +13,8 @@ class Trainer():
         self.criterion = loss_function
         self.optimizer = optimizer
         self.diagnostic_manager = diagnostic_manager
-
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda")
-        else:
-            warnings.warn("No cuda device found. Training on CPU")
-            self.device = torch.device("cpu")
+        self.device = device
+        
 
     def before_train(self):
         self.diagnostic_manager.forced_run(0, 0, self.model, self.criterion, self.train_metrics_loader, self.val_loader, self.device, self.optimizer)

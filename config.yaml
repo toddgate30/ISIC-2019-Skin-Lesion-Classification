@@ -26,5 +26,5 @@ num_workers: 8
 
 wandb:
   project: ISIC_Initial_Runs
-  name: "imbalanced_Uniform_AdamW_lr-0.001_seed1"
+  name: "imbalanced_Uniform_AdamW_lr-0.001_WeightedLoss_seed1"
   

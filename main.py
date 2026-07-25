@@ -11,6 +11,7 @@ from src.loss_functions.build_loss import build_loss
 from src.optimizers.build_optimizer import build_optimizer
 from src.diagnostics.diagnostic_manager import DiagnosticManager
 from datetime import datetime
+import warnings
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -44,13 +45,19 @@ def main():
         name=wandb_name
     )
 
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        warnings.warn("No cuda device found. Training on CPU")
+        device = torch.device("cpu")
+
     train_loader, train_metrics_loader, val_loader, class_counts = prepare_data(config)
 
     model = build_model(config)
 
     selector = build_selector(config)
 
-    loss_function = build_loss(config, class_counts)
+    loss_function = build_loss(config, class_counts, device)
 
     optimizer = build_optimizer(model, config)
 
@@ -63,7 +70,8 @@ def main():
         loss_function=loss_function,
         optimizer = optimizer,
         diagnostic_manager = diagnostic_manager,
-        config=config
+        config=config,
+        device=device
         )
 
     trainer.before_train()
