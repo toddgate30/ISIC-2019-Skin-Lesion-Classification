@@ -34,6 +34,7 @@ class TrainingContext:
     train_loader: DataLoader
     train_metrics_loader: DataLoader
     val_loader: DataLoader
+    selector: function
 
 def main():
 
@@ -63,30 +64,25 @@ def main():
         warnings.warn("No cuda device found. Training on CPU")
         device = torch.device("cpu")
 
-
-
     train_loader, train_metrics_loader, val_loader, class_counts = prepare_data(config)
-
-    model = build_model(config)
-
-    selector = build_selector(config)
-
+    model = build_model(config).to(device)
     loss_function = build_loss(config, class_counts, device)
-
+    selector = build_selector(config)
     optimizer = build_optimizer(model, config)
 
-    diagnostic_manager = DiagnosticManager(config)
-
-    trainer = Trainer(
+    context = TrainingContext(
         model=model,
-        dataloaders=(train_loader, train_metrics_loader, val_loader),
-        selector=selector,
+        optimizer=optimizer,
         loss_function=loss_function,
-        optimizer = optimizer,
-        diagnostic_manager = diagnostic_manager,
-        config=config,
-        device=device
-        )
+        device=device,
+        train_loader=train_loader,
+        train_metrics_loader=train_metrics_loader,
+        val_loader=val_loader,
+        selector=selector
+    )
+
+    diagnostic_manager = DiagnosticManager(config)
+    trainer = Trainer(context, diagnostic_manager, config)
 
     trainer.before_train()
     trainer.train()
