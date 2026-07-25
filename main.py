@@ -12,6 +12,8 @@ from src.optimizers.build_optimizer import build_optimizer
 from src.diagnostics.diagnostic_manager import DiagnosticManager
 from datetime import datetime
 import warnings
+from dataclasses import dataclass
+from torch.utils.data import DataLoader
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -22,6 +24,16 @@ def parse_args():
         help="Path to configuration yaml file"
     )
     return parser.parse_args()
+
+@dataclass
+class TrainingContext:
+    model: torch.nn.Module
+    optimizer: torch.optim.Optimizer
+    loss_function: torch.nn.Module
+    device: torch.device
+    train_loader: DataLoader
+    train_metrics_loader: DataLoader
+    val_loader: DataLoader
 
 def main():
 
@@ -50,6 +62,8 @@ def main():
     else:
         warnings.warn("No cuda device found. Training on CPU")
         device = torch.device("cpu")
+
+
 
     train_loader, train_metrics_loader, val_loader, class_counts = prepare_data(config)
 
