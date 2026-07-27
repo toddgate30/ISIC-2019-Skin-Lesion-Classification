@@ -45,6 +45,8 @@ class Trainer():
 
                 self.diagnostic_manager.conditional_run(step, epoch, self.context)
         self.final_step_count = step
+        if self.context.lr_scheduler is not None:
+            self.context.lr_scheduler.step()
     
     def after_train(self):
         self.diagnostic_manager.forced_run(self.final_step_count, self.total_epochs, self.context, final_log=True)

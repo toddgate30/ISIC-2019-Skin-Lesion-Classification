@@ -66,6 +66,12 @@ def prepare_data(config):
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
         transforms.RandomRotation(20),
+        transforms.ColorJitter(
+            brightness=0.2,
+            contrast=0.2,
+            saturation=0.2,
+            hue=0.05
+        ),
         transforms.ToTensor(),
         transforms.Normalize(inet_mean, inet_std)
     ])
@@ -80,6 +86,7 @@ def prepare_data(config):
 
     label_columns = df.columns.drop("image")
     stratify_labels = df[label_columns].values.argmax(axis=1)
+    class_names = label_columns.tolist()
 
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, shuffle=True, stratify=stratify_labels)
 
@@ -103,7 +110,7 @@ def prepare_data(config):
     class_counts = np.bincount(train_labels)
 
 
-    return train_loader, train_metrics_loader, val_loader, class_counts
+    return train_loader, train_metrics_loader, val_loader, class_counts, class_names
     
 
 # prepare_data({"dataset": {"name": "isic2019", "path": "salviohexia/isic-2019-skin-lesion-images-for-classification"}})

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from scipy import optimize
+from sklearn.metrics import confusion_matrix
 
 def forward_pass(context, dataloader):
     model = context.model
@@ -14,7 +15,7 @@ def forward_pass(context, dataloader):
             batches += 1
             images = images.to(context.device)
             labels = labels.to(context.device)
-            all_logits.append(model(images).cpu())
+            all_logits.append(model(images))
             all_labels.append(labels)
         logits = torch.cat(all_logits, dim=0)
         predictions = logits.argmax(dim=1)
@@ -68,3 +69,6 @@ def eval_progress(log_probs, labels):
         return distance.sum()
     result = optimize.minimize_scalar(objective, bounds=(0.0, 1.0), method="bounded")
     return float(np.clip(result.x, 0.0, 1.0))
+
+def eval_confusion_matrix(labels, predictions):
+    return confusion_matrix(labels, predictions)

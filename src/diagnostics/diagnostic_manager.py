@@ -3,7 +3,7 @@ import wandb
 import numpy as np
 from scipy import optimize
 from pathlib import Path
-import diagnostics
+from . import diagnostics
 
 class DiagnosticManager():
     def __init__(self, config):
@@ -36,9 +36,9 @@ class DiagnosticManager():
         self.run_diagnostics(step, epoch, context, final_log=final_log)
 
     def run_diagnostics(self, step, epoch, context, final_log=False):
-        train_loss, train_acc, train_balanced_acc, train_progress = self.calculate_diagnotics(context, context.train_metrics_loader)
-        val_loss, val_acc, val_balanced_acc, val_progress = self.calculate_diagnotics(context, context.val_loader)
-        self._log_metrics(step, epoch, train_loss, train_acc, train_balanced_acc, train_progress, val_loss, val_acc, val_balanced_acc val_progress)
+        train_loss, train_acc, train_balanced_acc, train_progress, train_labels, train_predictions = self.calculate_diagnotics(context, context.train_metrics_loader)
+        val_loss, val_acc, val_balanced_acc, val_progress, val_labels, val_predictions = self.calculate_diagnotics(context, context.val_loader)
+        self._log_metrics(step, epoch, train_loss, train_acc, train_balanced_acc, train_progress, val_loss, val_acc, val_balanced_acc, val_progress, train_labels, train_predictions, val_labels, val_predictions, context.class_names)
         self.save_model(step, epoch, context, final_log, val_acc)
 
     def calculate_diagnotics(self, context, dataloader):
@@ -48,18 +48,27 @@ class DiagnosticManager():
         acc = diagnostics.eval_acc(predictions, labels)
         balanced_acc = diagnostics.eval_balanced_acc(predictions, labels)
         progress = diagnostics.eval_progress(log_probs, labels)
-        return loss, acc, balanced_acc, progress
+        return loss, acc, balanced_acc, progress, labels, predictions
     
-    def _log_metrics(self, step, epoch, train_loss, train_acc, train_balanced_acc, train_progress, val_loss, val_acc, val_balanced_acc, val_progress):
+    def _log_metrics(self, step, epoch, train_loss, train_acc, train_balanced_acc, train_progress, val_loss, val_acc, val_balanced_acc, val_progress, train_labels, train_predictions, val_labels, val_predictions, class_names):
+        # print("train_labels:", type(train_labels.cpu()), train_labels.cpu().shape)
+        # print("train_predictions:", type(train_predictions.cpu()), train_predictions.cpu().shape)
+        # print("class_names:", type(class_names), len(class_names))
+
+        # print("unique labels:", np.unique(train_labels.cpu()))
+        # print("unique predictions:", np.unique(train_predictions.cpu()))
+
         wandb.log({
             "train/loss": train_loss,
             "train/accuracy": train_acc,
             "train/balanced accuracy": train_balanced_acc,
             "train/progress": train_progress,
+            "train/confusion matrix": wandb.plot.confusion_matrix(y_true=train_labels.detach().cpu().numpy(), preds=train_predictions.detach().cpu().numpy(), class_names=class_names[:8]),
             "val/loss": val_loss,
             "val/accuracy": val_acc,
             "val/balanced accuracy": val_balanced_acc,
             "val/progress": val_progress,
+            "val/confusion matrix": wandb.plot.confusion_matrix(y_true=val_labels.detach().cpu().numpy(), preds=val_predictions.detach().cpu().numpy(), class_names=class_names[:8]),
             "epoch": epoch
         }, step=step)
 

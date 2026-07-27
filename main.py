@@ -2,6 +2,11 @@ import torch
 import wandb
 import argparse
 import yaml
+from datetime import datetime
+import warnings
+from dataclasses import dataclass
+from torch.utils.data import DataLoader
+from typing import Callable
 
 from src.data.prepare_data import prepare_data
 from src.models.build_model import build_model
@@ -10,10 +15,8 @@ from src.Trainer import Trainer
 from src.loss_functions.build_loss import build_loss
 from src.optimizers.build_optimizer import build_optimizer
 from src.diagnostics.diagnostic_manager import DiagnosticManager
-from datetime import datetime
-import warnings
-from dataclasses import dataclass
-from torch.utils.data import DataLoader
+from src.schedulers.build_scheduler import build_scheduler
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -34,7 +37,9 @@ class TrainingContext:
     train_loader: DataLoader
     train_metrics_loader: DataLoader
     val_loader: DataLoader
-    selector: function
+    selector: Callable
+    lr_scheduler: torch.optim.lr_scheduler
+    class_names: list
 
 def main():
 
@@ -64,11 +69,12 @@ def main():
         warnings.warn("No cuda device found. Training on CPU")
         device = torch.device("cpu")
 
-    train_loader, train_metrics_loader, val_loader, class_counts = prepare_data(config)
+    train_loader, train_metrics_loader, val_loader, class_counts, class_names = prepare_data(config)
     model = build_model(config).to(device)
-    loss_function = build_loss(config, class_counts, device)
+    loss_function = build_loss(config, class_counts).to(device)
     selector = build_selector(config)
     optimizer = build_optimizer(model, config)
+    lr_scheduler = build_scheduler(optimizer, config)
 
     context = TrainingContext(
         model=model,
@@ -78,7 +84,9 @@ def main():
         train_loader=train_loader,
         train_metrics_loader=train_metrics_loader,
         val_loader=val_loader,
-        selector=selector
+        selector=selector,
+        lr_scheduler=lr_scheduler,
+        class_names=class_names
     )
 
     diagnostic_manager = DiagnosticManager(config)

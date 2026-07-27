@@ -2,7 +2,7 @@ import torch
 
 def build_optimizer(model, config):
     optim_name = config.get("optimizer", "AdamW")
-    kwargs = config["optim_params"]
+    kwargs = config.get("optim_params", {})
 
     if optim_name == "AdamW":
         return torch.optim.AdamW(model.parameters(), **kwargs)

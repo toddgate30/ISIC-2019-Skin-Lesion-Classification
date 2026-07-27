@@ -14,17 +14,21 @@ loss_function: WeightedCrossEntropy
 
 optimizer: AdamW
 optim_params:
-  lr: 0.001
+  lr: 0.0001
+
+scheduler: CosineAnnealingLR
+scheduler_params:
+  eta_min: 1e-6
 
 selection_method: Uniform
 metabatch_size: 320
 batch_ratio: 0.1
 
-total_epochs: 100
+total_epochs: 1000
 diagnostics_interval: log_interval
 num_workers: 8
 
 wandb:
   project: ISIC_Initial_Runs
-  name: "imbalanced_Uniform_AdamW_lr-0.001_WeightedLoss_seed1"
+  name: "Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_seed1"
   
