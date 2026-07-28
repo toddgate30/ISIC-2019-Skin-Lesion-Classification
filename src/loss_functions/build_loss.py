@@ -5,10 +5,11 @@ import numpy as np
 
 def build_loss(config, class_counts):
     loss_name = config.get("loss_function", "CrossEntropy")
+    kwargs = config.get("loss_params", {})
     if loss_name == "CrossEntropy":
-        return nn.CrossEntropyLoss()
+        return nn.CrossEntropyLoss(**kwargs)
     elif loss_name == "WeightedCrossEntropy":
         class_weights = torch.tensor(class_counts.sum() / (len(class_counts) * class_counts), dtype=torch.float32)
-        return nn.CrossEntropyLoss(weight=class_weights)
+        return nn.CrossEntropyLoss(weight=class_weights, **kwargs)
     else:
         raise NotImplementedError(f"Loss Function {loss_name} not implemented.")

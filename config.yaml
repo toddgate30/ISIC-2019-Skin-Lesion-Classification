@@ -11,6 +11,8 @@ dataset:
 model_name: resnet18
 
 loss_function: WeightedCrossEntropy
+loss_params:
+  label_smoothing: 0.1
 
 optimizer: AdamW
 optim_params:
@@ -30,5 +32,5 @@ num_workers: 8
 
 wandb:
   project: ISIC_Initial_Runs
-  name: "Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_seed1"
+  name: "Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_LabelSmoothing_seed1"
   
