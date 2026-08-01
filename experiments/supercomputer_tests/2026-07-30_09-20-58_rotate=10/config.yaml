@@ -1,38 +1,27 @@
-# config.yaml
-
 project:
   name: isic_skin_lesion
   seed: 1
-
 dataset:
   name: isic2019
   path: salviohexia/isic-2019-skin-lesion-images-for-classification
 data_params:
-  transform_rotation: 20
-
+  transform_rotation: 10
 model_name: resnet18
-
 loss_function: WeightedCrossEntropy
 loss_params:
   label_smoothing: 0.1
-
 optimizer: AdamW
 optim_params:
   lr: 0.0001
-
 scheduler: CosineAnnealingLR
 scheduler_params:
   eta_min: 1e-6
-
 selection_method: Uniform
 metabatch_size: 320
 batch_ratio: 0.1
-
 total_epochs: 1000
 diagnostics_interval: log_interval
 num_workers: 4
-
 wandb:
   project: ISIC_Initial_Runs
-  name: "Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_LabelSmoothing_seed1"
-  
+  name: Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_LabelSmoothing_seed1

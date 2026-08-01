@@ -50,7 +50,8 @@ def prepare_data(config):
     if raw_dataset_path is None:
         raise KeyError("Missing dataset.path in config file")
     
-    dataset_path = Path(kagglehub.dataset_download(raw_dataset_path))
+    # dataset_path = Path(kagglehub.dataset_download(raw_dataset_path))
+    dataset_path = Path("~/.cache/kagglehub/datasets/salviohexia/isic-2019-skin-lesion-images-for-classification/versions/1/").expanduser().resolve()
 
     if dataset_name == "isic2019":
         labels_path = dataset_path / "ISIC_2019_Training_GroundTruth.csv"
@@ -61,11 +62,13 @@ def prepare_data(config):
     inet_mean = [0.485, 0.456, 0.406]
     inet_std = [0.229, 0.224, 0.225]
 
+    rotation = config.get("data_params", {}).get("transform_rotation", 20)
+
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
-        transforms.RandomRotation(20),
+        transforms.RandomRotation(rotation),
         transforms.ColorJitter(
             brightness=0.2,
             contrast=0.2,
