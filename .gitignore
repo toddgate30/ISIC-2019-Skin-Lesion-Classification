@@ -20,6 +20,7 @@ datasets/
 *.ckpt
 
 # Experiment outputs
+experiments/
 runs/
 logs/
 wandb/

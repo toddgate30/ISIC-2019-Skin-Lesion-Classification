@@ -1,6 +1,6 @@
 import torch
 import warnings
-from diagnostics.save_checkpoint import save_checkpoint
+from src.diagnostics.save_checkpoint import save_checkpoint
 
 class Trainer():
     def __init__(self, context, diagnostic_manager, config):
