@@ -22,6 +22,20 @@ from src.schedulers.build_scheduler import build_scheduler
 
 @dataclass
 class TrainingContext:
+    """Stores the components and data loaders required for model training.
+
+    Attributes:
+        model: Model being trained.
+        optimizer: Optimizer used to update the model parameters.
+        loss_function: Loss function used during training.
+        device: Device on which the model and training computations are performed.
+        train_loader: Data loader used to provide training batches.
+        train_metrics_loader: Data loader used to compute training metrics.
+        val_loader: Data loader used for validation.
+        selector: Batch-selection method used to select training examples.
+        lr_scheduler: Learning-rate scheduler associated with the optimizer.
+        class_names: Names of the classes in the dataset.
+    """
     model: torch.nn.Module
     optimizer: torch.optim.Optimizer
     loss_function: torch.nn.Module
@@ -34,6 +48,12 @@ class TrainingContext:
     class_names: list
 
 def parse_args():
+    """Parse command-line arguments used to configure a training run.
+
+    Returns:
+        Parsed command-line arguments containing the configuration file path
+        and run directory.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
@@ -50,6 +70,22 @@ def parse_args():
     return parser.parse_args()
 
 def restore_checkpoint(context, checkpoint_path, trainer):
+    """Restore training state from a saved checkpoint.
+
+    Restores the model, optimizer, loss function, learning-rate scheduler,
+    random number generator states, and trainer state. The checkpoint's
+    configuration is returned so that the training run can resume using the
+    configuration with which the checkpoint was created.
+
+    Args:
+        context: Training context containing the model, optimizer, loss
+            function, and learning-rate scheduler to restore.
+        checkpoint_path: Path to the checkpoint file.
+        trainer: Trainer whose training state should be restored.
+
+    Returns:
+        The configuration saved in the checkpoint.
+    """
     checkpoint = torch.load(checkpoint_path, map_location=context.device)
 
     config = checkpoint["config"]
@@ -73,6 +109,13 @@ def restore_checkpoint(context, checkpoint_path, trainer):
 
 
 def main():
+    """Initialize and run a training experiment.
+
+    Loads the experiment configuration, prepares the data and training
+    components, restores a previous checkpoint when available, and runs the
+    training process to completion. New runs are initialized in Weights &
+    Biases, while resumed runs continue the existing Weights & Biases run.
+    """
     args = parse_args()
 
     with open(args.config, "r") as file:
