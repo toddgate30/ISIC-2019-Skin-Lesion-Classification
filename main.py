@@ -86,14 +86,13 @@ def restore_checkpoint(context, checkpoint_path, trainer):
     Returns:
         The configuration saved in the checkpoint.
     """
+    # Loads and unpacks the checkpoint
     checkpoint = torch.load(checkpoint_path, map_location=context.device)
-
     config = checkpoint["config"]
 
     context.model.load_state_dict(checkpoint["model_state_dict"])
     context.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     context.loss_function.load_state_dict(checkpoint["loss_function_state_dict"])
-
     if context.lr_scheduler is not None and checkpoint["scheduler"] is not None:
         context.lr_scheduler.load_state_dict(checkpoint["scheduler"])
 
@@ -116,21 +115,20 @@ def main():
     training process to completion. New runs are initialized in Weights &
     Biases, while resumed runs continue the existing Weights & Biases run.
     """
+    # Parses the args and loads the config file
     args = parse_args()
-
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
-
     config["run_dir"] = args.run_dir
 
-    
-
+    # Establishes a device for training
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
         warnings.warn("No cuda device found. Training on CPU")
         device = torch.device("cpu")
 
+    # Builds each of the elements that will be placed inside the context object
     train_loader, train_metrics_loader, val_loader, class_counts, class_names = prepare_data(config)
     model = build_model(config).to(device)
     loss_function = build_loss(config, class_counts).to(device)
@@ -154,6 +152,7 @@ def main():
     diagnostic_manager = DiagnosticManager(config)
     trainer = Trainer(context, diagnostic_manager, config)
 
+    # Sets the path for saving checkpoints which are necessary for preemptible runs with requeueing. Sets tracking to WandB.
     checkpoint_path = Path(config["run_dir"]) / "checkpoints" / "latest_checkpoint.pth"
     if checkpoint_path.exists():
         print(f"Restoring from checkpoint: {checkpoint_path}")
