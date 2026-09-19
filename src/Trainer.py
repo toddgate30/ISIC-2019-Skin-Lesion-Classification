@@ -79,21 +79,20 @@ class Trainer():
             print(f"\n{'=' * 50}")
             print(f"Training Epoch {epoch}")
             print(f"{'=' * 50}")
-            # Training Loop
-            model.train()
 
             # Starts training loop
             for metabatch_images, metabatch_labels in self.context.train_loader:
                 step += 1
                 metabatch_images = metabatch_images.to(device)
                 metabatch_labels = metabatch_labels.to(device)
-                images, labels = self.context.selector(metabatch_images, metabatch_labels, batch_ratio)
+                images, labels = self.context.selector(metabatch_images, metabatch_labels, batch_ratio, self.context)
 
                 # Forward Pass
+                model.train()
                 outputs = model(images)
 
                 # Calculate Loss
-                loss = self.context.loss_function(outputs, labels)
+                loss = self.context.loss_function(outputs, labels).mean()
 
                 # Backpropagation
                 self.context.optimizer.zero_grad()
