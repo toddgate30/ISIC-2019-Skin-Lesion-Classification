@@ -6,7 +6,6 @@ import numpy as np
 def build_loss(config, class_counts):
     loss_name = config.get("loss_function", "CrossEntropy")
     kwargs = config.get("loss_params", {})
-    kwargs['reduction'] = 'none'
     if loss_name == "CrossEntropy":
         return nn.CrossEntropyLoss(**kwargs)
     elif loss_name == "WeightedCrossEntropy":

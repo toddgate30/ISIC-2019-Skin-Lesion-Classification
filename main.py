@@ -87,7 +87,7 @@ def restore_checkpoint(context, checkpoint_path, trainer):
         The configuration saved in the checkpoint.
     """
     # Loads and unpacks the checkpoint
-    checkpoint = torch.load(checkpoint_path, map_location=context.device)
+    checkpoint = torch.load(checkpoint_path, map_location=context.device, weights_only=False)
     config = checkpoint["config"]
 
     context.model.load_state_dict(checkpoint["model_state_dict"])

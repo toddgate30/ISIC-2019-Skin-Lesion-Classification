@@ -1,6 +1,6 @@
 import torch
-from uniform_selector import uniform_selector
-from div_bs import div_bs
+from .uniform_selector import uniform_selector
+from .div_bs import div_bs
 
 def build_selector(config):
     selection_method = config.get("selection_method", "Uniform")

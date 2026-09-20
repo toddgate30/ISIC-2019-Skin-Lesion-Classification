@@ -24,10 +24,10 @@ def forward_pass(context, dataloader):
     return logits, predictions, log_probs, labels
 
 def eval_loss(context, logits, labels):
-    return context.loss_function(logits, labels)
+    return context.loss_function(logits, labels).item()
 
 def eval_acc(predictions, labels):
-    return (predictions == labels).float().mean()
+    return (predictions == labels).float().mean().item()
 
 def eval_balanced_acc(predictions, labels):
     num_classes = int(labels.max().item()) + 1
@@ -38,7 +38,7 @@ def eval_balanced_acc(predictions, labels):
         if class_mask.any():
             class_acc = (predictions[class_mask] == labels[class_mask]).float().mean()
         class_accuracies.append(class_acc)
-    return torch.stack(class_accuracies).mean()
+    return torch.stack(class_accuracies).mean().item()
 
 def eval_progress(log_probs, labels):
     probs = torch.exp(log_probs.detach()).cpu()

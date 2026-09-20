@@ -12,9 +12,10 @@ def run():
             base_config = yaml.safe_load(file)
 
     grid_search = {
-         "data_params.transform_rotation": [0, 10, 20, 30, 40, 50]
+         "selection_method": ['Uniform', 'DivBS'],
+         "loss_function": ['CrossEntropy', 'WeightedCrossEntropy']
     }
-    project_dir = Path("./experiments/supercomputer_tests")
+    project_dir = Path("./experiments/Online-Batch_Selection/9-19-26")
     time = "24:00:00"
 
     parameter_names = list(grid_search.keys())
@@ -28,8 +29,9 @@ def run():
         for parameter_name, value in zip(parameter_names, values):
             set_nested_value(config, parameter_name, value)
 
+        config['wandb']['name'] = "_".join([config['selection_method'], config['loss_function'], config['wandb']['name']])
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        job_name = f"{timestamp}_rotate={config['data_params']['transform_rotation']}"
+        job_name = f"{timestamp}_{config['wandb']['name']}"
         submit_run(config, project_dir, job_name, time)
 
 if __name__ == "__main__":

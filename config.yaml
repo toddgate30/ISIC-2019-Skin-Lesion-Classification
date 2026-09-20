@@ -8,7 +8,7 @@ dataset:
   name: isic2019
   path: salviohexia/isic-2019-skin-lesion-images-for-classification
 data_params:
-  transform_rotation: 20
+  transform_rotation: 10
 
 model_name: resnet18
 
@@ -33,6 +33,6 @@ diagnostics_interval: log_interval
 num_workers: 4
 
 wandb:
-  project: ISIC_Initial_Runs
-  name: "Uniform_AdamW_lr-0.001_WeightedLoss_WeightDecay_ColorJitter_LabelSmoothing_seed1"
+  project: ISIC_Online-Batch-Selection
+  name: "lr_0.0001_seed1"
   

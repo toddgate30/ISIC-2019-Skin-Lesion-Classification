@@ -15,7 +15,7 @@ def div_bs(metabatch_images, metabatch_labels, ratio, context):
             A tuple containing the selected images and their corresponding labels.
         """
     model = context.model
-    batch_size = len(metabatch_labels) * ratio
+    batch_size = int(len(metabatch_labels) * ratio)
 
     grad_mean, gradients = compute_gradients(metabatch_images, metabatch_labels, model)
     indices = greedy_selection(grad_mean, gradients, batch_size)
@@ -81,10 +81,10 @@ def greedy_selection(grad_mean, gradients, number_to_select):
 
         residual = (residual - (selected_vector @ residual) * selected_vector)
 
-        # If the greedy procedure doesn't obtain enough samples, fill the reamined randomly
-        if len(selected_indices) < number_to_select:
-            remaining = list(set(range(gradients.shape[0])) - set(selected_indices))
-            num_random = number_to_select - len(selected_indices)
+    # If the greedy procedure doesn't obtain enough samples, fill the reamined randomly
+    if len(selected_indices) < number_to_select:
+        remaining = list(set(range(gradients.shape[0])) - set(selected_indices))
+        num_random = number_to_select - len(selected_indices)
 
-            selected_indices.extend(np.random.choice(remaining, num_random, replace=False).tolist())
+        selected_indices.extend(np.random.choice(remaining, num_random, replace=False).tolist())
     return selected_indices
